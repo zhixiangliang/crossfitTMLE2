@@ -308,7 +308,7 @@ tmle_single = function(data,
 
   for(i in 1:n_split){
     rdc[i] <- mean(mu_sum[mu_sum$ss == i, ]$mu1) - mean(mu_sum[mu_sum$ss == i, ]$mu0)
-    MORC[i] <- [mean(mu_sum[mu_sum$ss == i, ]$mu1)]*[1-mean(mu_sum[mu_sum$ss == i, ]$mu0] / [1-mean(mu_sum[mu_sum$ss == i, ]$mu1)]/ mean(mu_sum[mu_sum$ss == i, ]$mu0)
+    MORC[i] <- [mean(mu_sum[mu_sum$ss == i, ]$mu1)*[1-mean(mu_sum[mu_sum$ss == i, ]$mu0]]] / [[1-mean(mu_sum[mu_sum$ss == i, ]$mu1)] / mean(mu_sum[mu_sum$ss == i, ]$mu0)]
     D1 = with(mu_sum[mu_sum$ss == i, ], (x/pi)*(y-mu1) + (mu1 - mean(mu1)))
     D0 = with(mu_sum[mu_sum$ss == i, ], ((1-x)/(1-pi))*(y-mu0) + (mu0 - mean(mu0)))
     EIC = D1-D0
