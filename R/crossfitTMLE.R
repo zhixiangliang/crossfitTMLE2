@@ -99,7 +99,7 @@ for(cf in 1:num_cf){
   l_ci = results[1] - t.value*sqrt(results[3])
   u_ci = results[1] + t.value*sqrt(results[3])
 
-  res1 = tibble(ATE=results[1], se = sqrt(results[3]), lower.ci = l_ci, upper.ci = u_ci, res = res)
+  res1 = tibble(ATE=results[1], se = sqrt(results[3]), lower.ci = l_ci, upper.ci = u_ci, MOR = results[3])
 
   return(res1)
 }
