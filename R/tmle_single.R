@@ -325,6 +325,5 @@ tmle_single = function(data,
   res <- data.frame(rd=rd, var = var1 , S1 = S1 , S0 = S0)
 
   return(res)
-
 }
 
