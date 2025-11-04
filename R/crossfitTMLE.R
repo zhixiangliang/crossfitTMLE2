@@ -59,7 +59,7 @@ crossfitTMLE <- function(data,
   for(cf in 1:num_cf){
     seed1 = cf_seed[cf]
     fit_result = try({
-               tmle_single(data,
+        tmle_single(data,
                        exposure,
                        outcome,
                        covarsT,
@@ -74,7 +74,7 @@ crossfitTMLE <- function(data,
                        seed=seed1)}, silent = TRUE)
 
     if (inherits(fit_result, "try-error")) {
-      fit_sngle <-  data.frame(rd=NA, var = NA)
+      fit_sngle <-  data.frame(or=NA, log_or_se=NA)
     } else {
       fit_sngle <- fit_result
     }
@@ -84,22 +84,48 @@ crossfitTMLE <- function(data,
 
   res = dplyr::bind_rows(runs)
 
+  # 计算对数OR
+  res$log_or <- log(res$or)
+
   if(stat == "mean"){
-    medians <- apply(res, 2, mean, na.rm = TRUE)
-    res <- res %>% mutate(var0 = var + (rd - medians[1])^2)
-    results <- apply(res, 2, mean, na.rm = TRUE)
+    # 在对数尺度上计算均值
+    mean_log_or <- mean(res$log_or, na.rm = TRUE)
+    # 调整方差：平均的渐近方差 + 交叉拟合间的方差
+    # 总方差 = 平均的log_or_se^2 + (log_or - mean_log_or)^2 的均值
+    mean_asymptotic_variance <- mean(res$log_or_se^2, na.rm = TRUE)
+    between_variance <- mean((res$log_or - mean_log_or)^2, na.rm = TRUE)
+    total_variance <- mean_asymptotic_variance + between_variance
+    results <- c(mean_log_or, total_variance)
   }
   if(stat == "median"){
-    medians <- apply(res, 2, median, na.rm = TRUE)
-    res <- res %>% mutate(var0 = var + (rd - medians[1])^2)
-    results <- apply(res, 2, median, na.rm = TRUE)
+    # 在对数尺度上计算中位数
+    median_log_or <- median(res$log_or, na.rm = TRUE)
+    # 对于中位数，我们如何调整方差？这里我们使用中位数绝对偏差（MAD）吗？
+    # 但是原代码中使用了中位数，然后调整方差的方式与均值类似，但使用中位数代替均值。
+    # 注意：原代码中对于中位数的调整是：var0 = var + (rd - medians[1])^2，然后取中位数。
+    # 这里我们类似地做：
+    median_asymptotic_variance <- median(res$log_or_se^2, na.rm = TRUE)
+    # 计算每个log_or与中位数的偏差的平方，然后取中位数
+    median_between_variance <- median((res$log_or - median_log_or)^2, na.rm = TRUE)
+    total_variance <- median_asymptotic_variance + median_between_variance
+    results <- c(median_log_or, total_variance)
   }
+
+  # 点估计：取指数
+  point_estimate <- exp(results[1])
+  # 标准误：sqrt(total_variance)
+  se <- sqrt(results[2])
+
+  # 置信区间：在对数尺度上计算，然后取指数
   t.value = qt((1-conf.level)/2, nrow(data), lower.tail = F)
+  l_ci_log = results[1] - t.value * se
+  u_ci_log = results[1] + t.value * se
 
-  l_ci = results[1] - t.value*sqrt(results[3])
-  u_ci = results[1] + t.value*sqrt(results[3])
+  # 转换回OR尺度
+  l_ci = exp(l_ci_log)
+  u_ci = exp(u_ci_log)
 
-  res1 = tibble(ATE=results[1], se = sqrt(results[3]), lower.ci = l_ci, upper.ci = u_ci)
+  res1 = tibble(OR=point_estimate, se = se, lower.ci = l_ci, upper.ci = u_ci)
 
   return(res1)
 }
