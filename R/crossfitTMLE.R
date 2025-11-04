@@ -74,7 +74,7 @@ for(cf in 1:num_cf){
                        seed=seed1)}, silent = TRUE)
 
     if (inherits(fit_result, "try-error")) {
-      fit_sngle <-  data.frame(rd=NA, var = NA)
+      fit_sngle <-  data.frame(rd=NA, var = NA , S1 = NA, S0 = NA)
     } else {
       fit_sngle <- fit_result
     }
@@ -99,7 +99,7 @@ for(cf in 1:num_cf){
   l_ci = results[1] - t.value*sqrt(results[3])
   u_ci = results[1] + t.value*sqrt(results[3])
 
-  res1 = tibble(ATE=results[1], se = sqrt(results[3]), lower.ci = l_ci, upper.ci = u_ci, MOR = results[3])
+  res1 = tibble(ATE=results[1], se = sqrt(results[3]), lower.ci = l_ci, upper.ci = u_ci, S1 = results[3] , S0 = results[4])
 
   return(res1)
 }
