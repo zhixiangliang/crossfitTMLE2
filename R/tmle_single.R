@@ -309,6 +309,8 @@ tmle_single = function(data,
   if1 = if0 = ifd = list()
   v1 = v0 = vd = NULL
   rdc <- NULL
+  S1C <- NULL
+  S0C <- NULL
   mu_summ <- list(); n <- NULL
 
   
