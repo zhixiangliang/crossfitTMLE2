@@ -96,10 +96,10 @@ for(cf in 1:num_cf){
   }
   t.value = qt((1-conf.level)/2, nrow(data), lower.tail = F)
 
-  l_ci = results[1] - t.value*sqrt(results[6])
-  u_ci = results[1] + t.value*sqrt(results[6])
+  l_ci = exp(results[7] - t.value * sqrt(results[8]))
+  u_ci = exp(results[7] + t.value * sqrt(results[8]))
 
-  res1 = tibble(ATE=results[1], se = sqrt(results[6]), lower.ci = l_ci, upper.ci = u_ci , S1 = results[3], S0 = results[4] , MOR = results[5])
+  res1 = tibble(ATE=results[1], S1 = results[3], S0 = results[4] , MOR = results[5], RR =results[6],  RR.lower.ci = l_ci, RR.upper.ci = u_ci)
 
   return(res1)
 }
